@@ -43,12 +43,15 @@ const WeatherDay = styled.div`
   padding: 0.5em;
   margin: 0.5em 0.1em;
   align-items: flex-end;
-  flex-grow: 1;
+  width: 100%;
   & > em{
     text-transform: capitalize;
     align-self: center;
-    padding-top: 0.5em;
+    padding-bottom: 0.75em;
     margin-top: auto;
+  }
+  & > h5{
+    align-self: center;
   }
 `;
 
@@ -81,16 +84,16 @@ function Weather(props: {children?:React.ReactNode, weather:any|null}) {
               </WeatherField>
               <br />
               <WeatherField colour={theme.weatherHigh}>
-                <FontAwesomeIcon icon={faTemperatureHigh}/>
+                <FontAwesomeIcon icon={faTemperatureHigh}/>&nbsp;
                 {toCelsius(props.weather.daily[0].temp.max)}&#8451;
               </WeatherField>
               <WeatherField colour={theme.weatherLow}>
-                <FontAwesomeIcon icon={faTemperatureLow}/>
+                <FontAwesomeIcon icon={faTemperatureLow}/>&nbsp;
                 {toCelsius(props.weather.daily[0].temp.min)}&#8451;
               </WeatherField>
               <WeatherField colour={theme.weatherRain}>
-                <FontAwesomeIcon icon={faCloudRain}/>
-                {props.weather.daily[0].rain*100}%
+                <FontAwesomeIcon icon={faCloudRain}/>&nbsp;
+                {props.weather.daily[0].pop*100}%
               </WeatherField>
             </div>
           </WeatherIconWrapper>
@@ -101,25 +104,25 @@ function Weather(props: {children?:React.ReactNode, weather:any|null}) {
                   <h5>
                   {key === 0 ?
                     "Tomorrow" :
-                    new Date(day.dt * 1000).toLocaleDateString()}
+                    new Date(day.dt * 1000).toLocaleDateString("en-GB")}
                   </h5>
                   <WeatherIconImg
                     src={WeatherIcon[day.weather?.[0].icon]}
                     alt=""
                   />
-                  <WeatherField colour={theme.weatherHigh}>
+                  <em>{day.weather[0].description}</em>
+                  <WeatherField colour={theme.weatherHigh}>&nbsp;
                       <FontAwesomeIcon icon={faTemperatureHigh}/>
                     {toCelsius(day.temp.max)}&#8451;
                   </WeatherField>
-                  <WeatherField colour={theme.weatherLow}>
+                  <WeatherField colour={theme.weatherLow}>&nbsp;
                       <FontAwesomeIcon icon={faTemperatureLow}/>
                     {toCelsius(day.temp.min)}&#8451;
                   </WeatherField>
                   <WeatherField colour={theme.weatherRain}>
-                    <FontAwesomeIcon icon={faCloudRain}/>
+                    <FontAwesomeIcon icon={faCloudRain}/>&nbsp;
                     {day.pop*100}%
                   </WeatherField>
-                  <em>{day.weather[0].description}</em>
                 </WeatherDay>
               )
             )}
