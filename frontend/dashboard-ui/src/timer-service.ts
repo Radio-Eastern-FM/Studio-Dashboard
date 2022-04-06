@@ -1,18 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
+import usePersistentState from './persistent-state';
 
-export default function useTimer(onFinish:Function, date:Date) {
-  const [secondsLeft, setSecondsLeft] = useState(0);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [timeDue, setTimeDue] = useState(new Date());
-  const [isComplete, setIsComplete] = useState(true);
+export default function useTimer(onFinish:Function, date:Date, timerID:string) {
+  const [secondsLeft, setSecondsLeft] = usePersistentState<number>(timerID + '-secondsLeft', 0);
+  const [timerRunning, setTimerRunning] = usePersistentState<boolean>(timerID + '-timerRunning', false);
+  const [timeDue, setTimeDue] = usePersistentState<Date>(timerID + '-timeDue', new Date());
+  const [isComplete, setIsComplete] = usePersistentState<boolean>(timerID + '-isComplete', true);
   
-  const start = () => {
+  function start () {
     // console.log("start");
     setIsComplete(false);
     setTimerRunning(true);
   };
   
-  const pause = () => {
+  function pause () {
     // console.log("pause");
     updateTimer();
     setTimerRunning(false);
@@ -24,9 +25,9 @@ export default function useTimer(onFinish:Function, date:Date) {
     setSecondsLeft(0);
     setTimeDue(date);
     setIsComplete(true);
-  }, [date]);
+  }, [date, setIsComplete, setSecondsLeft, setTimeDue, setTimerRunning]);
   
-  const getCountDown = () => {
+  function getCountDown () : string {
     const countdown = new Date(0);
     countdown.setSeconds(secondsLeft);
     let cutoff:number = 11;
@@ -52,11 +53,11 @@ export default function useTimer(onFinish:Function, date:Date) {
     else{
       setSecondsLeft(seconds);
     }
-  }, [date, onFinish, reset, timeDue]);
+  }, [date, onFinish, reset, setSecondsLeft, timeDue]);
   
-  const setByDate = (timerEnd:Date) => {
+  const setByDate = useCallback((timerEnd:Date) => {
     setTimeDue(timerEnd);
-  };
+  }, [setTimeDue]);
   
   const setByInterval = useCallback((seconds:number, minutes:number, hours:number, ) => {
     const totalSeconds = seconds + 60*minutes + 60*60*hours;
@@ -66,7 +67,7 @@ export default function useTimer(onFinish:Function, date:Date) {
     timerEnd.setTime(date.getTime() + totalSeconds*1000)
     
     setByDate(timerEnd);
-  }, [date]);
+  }, [date, setByDate]);
   
   useEffect(() => {
     if(timerRunning) {

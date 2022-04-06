@@ -66,8 +66,7 @@ def update_time():
   message_deliverer.notify(Message('date', {"date": datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}))
   
 def update_weather():
-  # threading.Timer(60, update_weather).start()
-  threading.Timer(5*60, update_time).start()
+  threading.Timer(120, update_time).start()
   secret = settings.OPEN_WEATHER_API_KEY
   weatherURL = f"https://api.openweathermap.org/data/2.5/onecall?lat=-37.79616776238214&lon=145.2922194203585&APPID={secret}&exclude=hourly,minutely"
   with urllib.request.urlopen(weatherURL) as url:
@@ -83,22 +82,22 @@ def index(request):
   return response;
 
 def stream(request):
-  # Begin time service
-  global datetime_timer_running
-  if not datetime_timer_running:
-    datetime_timer_running = True
-    update_time()
-    
-  # Begin weather service
-  global weather_timer_running
-  if not weather_timer_running:
-    weather_timer_running = True
-    update_weather()
-  
   subscription = Subscription()
-  message_deliverer.register(subscription)
-  
   def event_stream():
+    message_deliverer.register(subscription)
+    
+    # Begin time service
+    global datetime_timer_running
+    if not datetime_timer_running:
+      datetime_timer_running = True
+      update_time()
+      
+    # Begin weather service
+    global weather_timer_running
+    if not weather_timer_running:
+      weather_timer_running = True
+      update_weather()
+    
     while True:
       time.sleep(0.25)
       

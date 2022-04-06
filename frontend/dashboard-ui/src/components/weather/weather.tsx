@@ -66,12 +66,14 @@ const WeatherDaysWrapper = styled.div`
   flex-direction: row;
 `;
 
-const toCelsius = (kelvin:number, decimals:number=0) => Math.round((kelvin - 273.15)*Math.pow(10, decimals))/Math.pow(10, decimals)
+function toCelsius (kelvin:number, decimals:number=0) {
+  return Math.round((kelvin - 273.15)*Math.pow(10, decimals))/Math.pow(10, decimals);
+}
 
-function Weather(props: {children?:React.ReactNode, weather:any|null}) {
+function Weather(props: {children?:React.ReactNode, weather?:any}) {
   return (
     <Wrapper href="https://openweathermap.org/city/2169867" target="_blank">
-      {props.weather && 
+      {props.weather &&
         <>  
           <WeatherIconWrapper>
             <WeatherIconImg

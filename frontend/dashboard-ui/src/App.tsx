@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import Brand from './components/brand';
 import AnalogueClock from './components/clock';
@@ -12,6 +12,7 @@ import useMessages from './message-service';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import useTimer from './timer-service';
 import IntervalPicker from './components/interval-selector';
+import usePersistentState from './persistent-state';
 
 const Wrapper = styled.div`
   background-color: ${theme.background};
@@ -50,10 +51,6 @@ const AlertsWrapper = styled.div`
   flex-direction: column-reverse;
   pointer-events: none;
 `;
-
-interface KeyValuePair {
-  [id: string]: boolean|any;
-}
 
 const randomColour = (seed: number) => {
   return "#" + ((1<<24)*seed | 0).toString(16);
@@ -99,18 +96,18 @@ const pads:Array<{
 
 function App() {
   const [date, setDate] = useState<Date>(new Date());
-  const [dashboard, setDashboard] = useState<KeyValuePair>();
-  const [weather, setWeather] = useState();
-  const [alerts, setAlerts] = useState<Array<{level:AlertLevels, text:string, timestamp:string}>|null>();
+  const [dashboard, setDashboard] = usePersistentState<object|null>('dashboard', null);
+  const [weather, setWeather] = usePersistentState<object|null>('weather', null);
+  const [alerts, setAlerts] = usePersistentState<Array<{level:AlertLevels, text:string, timestamp:string}>|null>('alerts', []);
   const timer1 = useTimer(() => setAlerts([...(alerts ?? []), {
     level: "success",
     text: "Timer complete!",
     timestamp: date.toUTCString()
-  }]), date);
-  const [isSelectInterval, setIsSelectInterval] = useState(false);
+  }]), date, "timer1");
+  const [isSelectingInterval, setIsSelectingInterval] = useState(false);
   
   const setPad = useCallback((id:string, state:boolean) => {
-    setDashboard((prevState) => {
+    setDashboard((prevState:object) => {
       return (prevState !== undefined && prevState !== null) ?
       {
         ...prevState,
@@ -118,47 +115,7 @@ function App() {
       } :
       {[id]:state}
     });
-  },[])
-  
-  // Save dashboard each time it changes
-  useEffect(() => {
-    if(dashboard !== undefined && dashboard !== null){
-      localStorage.setItem('dashboard', JSON.stringify(dashboard));
-    }
-  }, [dashboard]);
-  
-  // Save Alerts each time it changes
-  useEffect(() => {
-    if(alerts !== undefined && alerts !== null){
-      localStorage.setItem('alerts', JSON.stringify(alerts));
-    }
-  }, [alerts]);
-  
-  // Save Weather each time it changes
-  useEffect(() => {
-    if(weather !== undefined && weather !== null){
-      localStorage.setItem('weather', JSON.stringify(weather));
-    }
-  }, [weather]);
-  
-  // Restore state from localStorage
-  useEffect(() => {
-    const storedDashboard:string|null = localStorage.getItem("dashboard");
-    if(storedDashboard !== undefined && storedDashboard !== null && storedDashboard !== 'undefined'){
-      setDashboard(JSON.parse(storedDashboard));
-    }
-    
-    const storedAlerts:string|null = localStorage.getItem("alerts");
-    if(storedAlerts !== undefined && storedAlerts !== null && storedAlerts !== '[]'){
-      setAlerts(JSON.parse(storedAlerts));
-    }
-    
-    const storedWeather:string|null = localStorage.getItem("weather");
-    if(storedWeather !== undefined && storedWeather !== null && storedWeather !== 'undefined'){
-      setWeather(JSON.parse(storedWeather));
-    }
-  }, []);
-  
+  },[setDashboard])
   
   useMessages((data: [{type:string, body:any}]) => {
     data.forEach((message) => {
@@ -201,7 +158,7 @@ function App() {
             key={key}
             colour={pad.colour}
             accentColour={pad.colour}
-            selected={dashboard?.[pad.id]}
+            selected={(dashboard as {[id: string]: boolean|any})?.[pad.id]}
             setSelected={(state:boolean) => setPad(pad.id, state)}
             icon={pad.icon}
           >
@@ -234,7 +191,7 @@ function App() {
             key={key}
             colour={pad.colour}
             accentColour={pad.colour}
-            selected={dashboard?.[pad.id]}
+            selected={(dashboard as {[id: string]: boolean|any})?.[pad.id]}
             setSelected={(state:boolean) => setPad(pad.id, state)}
             icon={pad.icon}
           >
@@ -250,7 +207,7 @@ function App() {
             setSelected={() => {}}
             onClick={() => {
               if(timer1.isComplete){
-                setIsSelectInterval(!isSelectInterval);
+                setIsSelectingInterval(!isSelectingInterval);
               }
               else{
                 timer1.isRunning ? timer1.pause() :timer1.start();
@@ -266,8 +223,8 @@ function App() {
               timer1.setByInterval(s, m, h)
               timer1.start();
             }}
-            onComplete={() => setIsSelectInterval(false)}
-            isVisible={isSelectInterval} />
+            onComplete={() => setIsSelectingInterval(false)}
+            isVisible={isSelectingInterval} />
       </Column>
     </Wrapper>
   );
