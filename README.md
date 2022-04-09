@@ -45,7 +45,7 @@ Within this file, rename the secrets to their proper values.
 
 `python ./manage.py runserver`
 
-*If prompted, you may have to conduct a migraton. Do this by typing `python manage.py migrate`*
+*If prompted, you may have to conduct a migration. Do this by typing* `python manage.py migrate`
 
 ---
 
@@ -66,7 +66,7 @@ Requirements:
 
 *For Deveopment*
 
-`npm start`
+`npm run start`
 
 
 *For Production:*
