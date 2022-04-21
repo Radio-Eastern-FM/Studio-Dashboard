@@ -1,10 +1,10 @@
 const theme = {
   primary: "#4287f5",
   primaryAccent: "#3277E5",
-  foreground: "#ffffff",
+  foreground: "#F4F4F4",
   foregroundAccent: "#E0E0E0",
-  background: "#202020",
-  backgroundAccent: "#303030",
+  background: "#101010",
+  backgroundAccent: "#181818",
   success: "#167c40",
   info: "#0695c3",
   warning: "#ffc107",

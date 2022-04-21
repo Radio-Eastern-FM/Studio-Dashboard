@@ -3,18 +3,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react';
 import 'react-clock/dist/Clock.css';
 import styled from 'styled-components';
-import theme from '../theme';
+import theme from '../settings/theme';
 
 const Button = styled.button`
+  display: block;
   width: 100%;
-  height: 15vh;
+  min-height: 12.5vh;
+  height: 100%;
   margin: 0.75em 0;
   background-color: ${(props:{colour:string, selected:boolean}) =>
     props.selected ? props.colour : theme.backgroundAccent};
   border: none;
   color: ${theme.foreground};
   transition: 0.1s;
-  font-size: 1.5em;
+  font-size: 1.6rem;
   
   :hover{
     cursor: pointer;

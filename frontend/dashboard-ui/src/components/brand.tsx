@@ -1,7 +1,7 @@
 import React from 'react';
 import 'react-clock/dist/Clock.css';
 import styled from 'styled-components';
-import theme from '../theme';
+import theme from '../settings/theme';
 
 const Wrapper = styled.div`
   color: ${theme.foreground};

@@ -15,3 +15,5 @@ function Small(props: {children?:React.ReactNode}) {
 }
 
 export default Small;
+
+// TODO: convert this back to a styled.component.

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import 'react-clock/dist/Clock.css';
 import styled from 'styled-components';
 import * as NumericInput from "react-numeric-input";
-import theme from '../theme';
+import theme from '../settings/theme';
 
 const Label = styled.span`
   font-size: 1.2em;

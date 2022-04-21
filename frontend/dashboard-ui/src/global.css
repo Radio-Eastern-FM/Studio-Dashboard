@@ -51,8 +51,9 @@ body{
   min-height:100vh!important;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Oxygen+Mono&display=swap');
-
 em{
 	font-style: italic;
 }
+
+/* Imports */
+@import url('https://fonts.googleapis.com/css2?family=Oxygen+Mono&display=swap');

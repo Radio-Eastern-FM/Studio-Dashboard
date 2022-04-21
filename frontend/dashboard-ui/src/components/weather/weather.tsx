@@ -3,7 +3,7 @@ import 'react-clock/dist/Clock.css';
 import styled from 'styled-components';
 import { faCloudRain, faTemperatureHigh, faTemperatureLow } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import theme from '../../theme';
+import theme from '../../settings/theme';
 import WeatherIcon from './WeatherIcon';
 
 const Wrapper = styled.a`
@@ -36,7 +36,7 @@ const WeatherIconWrapper = styled.div`
 `;
 
 const WeatherDay = styled.div`
-  border-radius: 10px;
+  border-radius: 3px;
   background-color: ${theme.backgroundAccent};
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@ function toCelsius (kelvin:number, decimals:number=0) {
 function Weather(props: {children?:React.ReactNode, weather?:any}) {
   return (
     <Wrapper href="https://openweathermap.org/city/2169867" target="_blank">
-      {props.weather &&
+      {(props.weather !== null && props.weather !== undefined ) &&
         <>  
           <WeatherIconWrapper>
             <WeatherIconImg

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Clock from 'react-clock';
 import 'react-clock/dist/Clock.css';
 import styled from 'styled-components';
-import theme from '../theme';
+import theme from '../settings/theme';
 
 const Wrapper = styled.div`
   position: relative;
@@ -47,18 +47,18 @@ const DigitalClock = styled.div`
   }
 `;
 
-function AnalogueClock(props:{ date:Date, setDate: Function }) {
-  const date = props.date
-  const setDate = props.setDate
+function AnalogueClock(props:{ date:Date, setDate:Function }) {
   useEffect(() => {
     const interval = setInterval(() => {
-      setDate(new Date(date.getTime() + 1000));
+      props.date.setSeconds(props.date.getSeconds() + 1);
+      props.setDate(new Date(props.date.getTime())); // trigger useState update
     }, 1000);
     
     return () => {
       clearInterval(interval);
     };
-  }, [date, setDate]);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
   
   return (
     <Wrapper>

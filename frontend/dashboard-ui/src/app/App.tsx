@@ -1,18 +1,18 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import Brand from './components/brand';
-import AnalogueClock from './components/clock';
-import Pad from './components/pad';
-import Small from './components/small';
-import theme from './theme';
-import { faBell, faMicrophone, faPhone, faRadio, faTowerCell, IconDefinition } from '@fortawesome/free-solid-svg-icons'
-import Weather from './components/weather/weather';
-import Alert, { AlertLevels } from './components/alert';
-import useMessages from './message-service';
+import Brand from '../components/brand';
+import AnalogueClock from '../components/clock';
+import Pad from '../components/pad';
+import Small from '../components/small';
+import theme from '../settings/theme';
+import Weather from '../components/weather/weather';
+import Alert, { AlertLevels } from '../components/alert';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
-import useTimer from './timer-service';
-import IntervalPicker from './components/interval-selector';
-import usePersistentState from './persistent-state';
+import useTimer from '../services/timer-service';
+import IntervalPicker from '../components/interval-selector';
+import usePersistentState from '../services/persistent-state';
+import useMQTTMessages from '../services/mqtt-service';
+import { pads } from '../settings/settings';
 
 const Wrapper = styled.div`
   background-color: ${theme.background};
@@ -29,8 +29,11 @@ const ClockWrapper = styled.div`
 `;
 
 const Column = styled.div`
+  display:flex;
   flex: 1;
+  flex-direction: column;
   padding: 0 2em;
+  justify-content: space-evenly;
 `
 
 const TimeString = styled.div`
@@ -52,91 +55,54 @@ const AlertsWrapper = styled.div`
   pointer-events: none;
 `;
 
-const randomColour = (seed: number) => {
-  return "#" + ((1<<24)*seed | 0).toString(16);
-}
-
-const pads:Array<{
-  id: string,
-  text: string,
-  colour: string,
-  icon: IconDefinition
-}> = [
-  {
-    id: "tower",
-    text: "Tower",
-    colour: randomColour(0.21),
-    icon: faTowerCell
-  },
-  {
-    id: "streaming",
-    text: "Streaming",
-    colour: randomColour(0.5),
-    icon: faRadio
-  },
-  {
-    id: "mic",
-    text: "Microphone",
-    colour: randomColour(0.13),
-    icon: faMicrophone
-  },
-  {
-    id: "phone",
-    text: "Phone",
-    colour: randomColour(0.92),
-    icon: faPhone
-  },
-  {
-    id: "door",
-    text: "Doorbell",
-    colour: randomColour(0.95),
-    icon: faBell
-  }
-]
-
 function App() {
   const [date, setDate] = useState<Date>(new Date());
-  const [dashboard, setDashboard] = usePersistentState<object|null>('dashboard', null);
+  const [dashboard, setDashboard] = usePersistentState<{[id: string]: boolean }>('dashboard', {});
   const [weather, setWeather] = usePersistentState<object|null>('weather', null);
   const [alerts, setAlerts] = usePersistentState<Array<{level:AlertLevels, text:string, timestamp:string}>|null>('alerts', []);
-  const timer1 = useTimer(() => setAlerts([...(alerts ?? []), {
-    level: "success",
-    text: "Timer complete!",
-    timestamp: date.toUTCString()
-  }]), date, "timer1");
+  const timer1 = useTimer(() =>
+    setAlerts([...(alerts ?? []), {
+      level: "success",
+      text: "Timer complete!",
+      timestamp: date.toUTCString()
+    }]),
+    date,
+    "timer1");
   const [isSelectingInterval, setIsSelectingInterval] = useState(false);
   
   const setPad = useCallback((id:string, state:boolean) => {
-    setDashboard((prevState:object) => {
-      return (prevState !== undefined && prevState !== null) ?
-      {
-        ...prevState,
-        [id]:state
-      } :
-      {[id]:state}
-    });
-  },[setDashboard])
+    console.log({[id]:state});
+    let d:object|null = dashboard;
+    (d as {[id: string]: boolean })[id] = state;
+    setDashboard(d);
+  },[dashboard, setDashboard]);
   
-  useMessages((data: [{type:string, body:any}]) => {
-    data.forEach((message) => {
-      console.log(message);
-      switch (message.type) {
-        case "date":
-          setDate(new Date(message.body.date));
-          break;
-        case "pad":
-          setPad(message.body.id, message.body.state);
-          break;
-        case "alert":
-          if(alerts === null || alerts === undefined )setAlerts([message.body])
-          else setAlerts([...alerts, message.body])
-          break;
-        case "weather":
-          setWeather(message.body);
-          break;
-      }
-    })
-  });
+  useMQTTMessages((topic:string, message:string) => {
+    switch (topic) {
+      case "efm/sensors/doorbell":
+        setPad('door', !(dashboard.door as boolean));
+        // timer1.setByInterval(10, 0, 0);
+        break;
+      case "efm/weather":
+        const w = JSON.parse(message)
+        console.log(w);
+        setWeather(w);
+        break;
+      case "efm/alerts":
+        console.log(message);
+        const JSONmsg = JSON.parse(message);
+        setAlerts([...(alerts ?? []), {
+          level: JSONmsg.level,
+          text: JSONmsg.text,
+          timestamp: date.toUTCString()
+        }]);
+        break;
+      case "efm/time":
+        console.log("NTP time:", message);
+        setDate(new Date((message as unknown as number)*1000))
+        break;
+    }
+  }, ["efm/sensors/doorbell", "efm/weather", "efm/alerts", "efm/time"]);
   
   return (
     <Wrapper className="App">
@@ -153,7 +119,9 @@ function App() {
         ).reverse()}
       </AlertsWrapper>
       <Column>
-        {pads.slice(0, 4).map((pad, key) => (
+        {pads.map((pad, key) => {
+          if(pad.side !== 'left') return <></>;
+          return (
           <Pad
             key={key}
             colour={pad.colour}
@@ -164,7 +132,8 @@ function App() {
           >
             {pad.text}
           </Pad>
-        ))}
+        )
+        })}
       </Column>
       <Column>
         <Brand>
@@ -172,7 +141,7 @@ function App() {
           <Small>Your voice in the outer-east</Small>
         </Brand>
         <ClockWrapper>
-          <AnalogueClock setDate={setDate} date={date}/>
+          <AnalogueClock date={date} setDate={setDate}/>
         </ClockWrapper>
         <TimeString>
           {
@@ -186,18 +155,21 @@ function App() {
         </TimeString>
       </Column>
       <Column>
-        {pads.slice(4).map((pad, key) => (
-          <Pad
-            key={key}
-            colour={pad.colour}
-            accentColour={pad.colour}
-            selected={(dashboard as {[id: string]: boolean|any})?.[pad.id]}
-            setSelected={(state:boolean) => setPad(pad.id, state)}
-            icon={pad.icon}
-          >
-            {pad.text}
-          </Pad>
-        ))}
+        {pads.map((pad, key) => {
+          if(pad.side !== 'right') return <></>;
+          return (
+            <Pad
+              key={key}
+              colour={pad.colour}
+              accentColour={pad.colour}
+              selected={(dashboard as {[id: string]: boolean|any})?.[pad.id]}
+              setSelected={(state:boolean) => setPad(pad.id, state)}
+              icon={pad.icon}
+            >
+              {pad.text}
+            </Pad>
+          );
+        })}
         <Weather weather={weather} />
           <Pad
             colour={"#E05f9f"}
@@ -210,7 +182,7 @@ function App() {
                 setIsSelectingInterval(!isSelectingInterval);
               }
               else{
-                timer1.isRunning ? timer1.pause() :timer1.start();
+                timer1.isRunning ? timer1.pause() : timer1.start();
               }
             }}
             ondblclick={() => timer1.reset()}
@@ -220,11 +192,12 @@ function App() {
           </Pad>
           <IntervalPicker
             setInterval={(s:number, m:number, h:number) => {
-              timer1.setByInterval(s, m, h)
-              timer1.start();
+              if(s === 0 && m === 0 && h === 0) return; // don't start 0 timer
+              timer1.setByInterval(s, m, h);
             }}
             onComplete={() => setIsSelectingInterval(false)}
-            isVisible={isSelectingInterval} />
+            isVisible={isSelectingInterval}
+          />
       </Column>
     </Wrapper>
   );
