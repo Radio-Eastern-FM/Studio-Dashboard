@@ -19,14 +19,19 @@ class MQTT:
     
     MQTT.client.username_pw_set(config['username'], config['password'])
     MQTT.client.on_connect = on_connect
-    MQTT.client.connect(config['host'], config['port'])
+    try:
+      MQTT.client.connect(config['host'], config['port'])
+      return True
+    except (ConnectionRefusedError): 
+      print('Couldn\'t connect to MQTT broker');
+      return False
   
   @staticmethod
   def initialise():
     # Create client
     MQTT.client = mqtt_client.Client(MQTT.client_id)
     # Connect to the MQTT broker
-    MQTT.connect()
+    while (not MQTT.connect()): pass
   
   @staticmethod
   def start():
