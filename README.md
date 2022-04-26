@@ -12,42 +12,9 @@ git clone https://github.com/Xenarc/StudioDashboad.git
 
 ## Backend
 
-Written in Python (Django)
+Written in Python
 
-### Installation
-
-Requirements:
-- python
-- pip
-
-> /StudioDashboad/backend/
-
-1. Install venv `python -m pip install virtualenv`
-
-2. Create virtual environment `python -m virtualenv venv`
-
-3. Activate virtual environment `./venv/Scripts/activate`
-
-4. Install required modules `pip install -r requirements.txt`
-
-### Add secrets
-
-Rename `.secret-settings.py`  to `secret-settings.py`
-
-```bash
-cd .\StudioDashboard\backend\studio_dashboard\studio_dashboard
-mv .\.secret_settings.py .\...secret_settings.py
-```
-
-Within this file, rename the secrets to their proper values.
-
-### Run django server
-
-`python ./manage.py runserver`
-
-*If prompted, you may have to conduct a migration. Do this by typing* `python manage.py migrate`
-
----
+Run: `python mqtt_service`
 
 ## Frontend
 
