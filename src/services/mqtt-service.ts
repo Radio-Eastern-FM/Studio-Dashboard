@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as mqtt from 'mqtt/dist/mqtt'
-// import mqtt from "mqtt";
-// import * as mqtt from "mqtt";
 
-// const MQTTserver = "ws://127.0.0.1:9001";
-// const MQTTserver = "mqtt://localhost:1883";
-const MQTTserver = "ws://192.168.0.26:9001";
-// const MQTTserver = "ws://192.168.0.26:9001";
-// const MQTTserver = "ws://localhost:9001";
+const MQTTserver = "ws://mqtt:9001";
 
 function getClient(errorHandler:Function) {
   const client = mqtt.connect(MQTTserver);

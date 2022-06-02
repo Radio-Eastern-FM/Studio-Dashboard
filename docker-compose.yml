@@ -1,0 +1,16 @@
+version: '3'
+services:
+  studio-dashboard:
+    build: 
+      context: .
+    ports:
+      - 8080:80
+  mqtt:
+    image: eclipse-mosquitto
+    container_name: mqtt
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./EFM_passwords.conf:/mosquitto/config/EFM_passwords.conf

@@ -5,12 +5,6 @@
 git clone https://github.com/Xenarc/StudioDashboad.git
 ```
 
-## Technical Description
-
-...
-
----
-
 ## Backend
 
 Written in Python
@@ -24,6 +18,7 @@ Written in Javascript (React - create-react-app)
 ### Installation
 
 Requirements:
+
 - npm
 
 > /StudioDashboard/frontend/dashboard-ui/
@@ -32,16 +27,12 @@ Requirements:
 
 ### Building and Running
 
-*For Deveopment*
+For Deveopment: `npm run start`
 
-`npm run start`
+For Production:
 
-
-*For Production:*
-
-Build: `npm run build`
-
-Run: `npm install -g serve`
+1. Build: `npm run build`
+2. Run: `npm install -g serve`
 
 ---
 

@@ -1,18 +1,18 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import Brand from '../components/brand';
-import AnalogueClock from '../components/clock';
-import Pad from '../components/pad';
-import Small from '../components/small';
-import theme from '../settings/theme';
-import Weather from '../components/weather/weather';
-import Alert, { AlertLevels } from '../components/alert';
+import Brand from './components/brand';
+import AnalogueClock from './components/clock';
+import Pad from './components/pad';
+import Small from './components/small';
+import theme from './settings/theme';
+import Weather from './components/weather/weather';
+import Alert, { AlertLevels } from './components/alert';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
-import useTimer from '../services/timer-service';
-import IntervalPicker from '../components/interval-selector';
-import usePersistentState from '../services/persistent-state';
-import useMQTTMessages from '../services/mqtt-service';
-import { pads } from '../settings/settings';
+import useTimer from './services/timer-service';
+import IntervalPicker from './components/interval-selector';
+import usePersistentState from './services/persistent-state';
+import useMQTTMessages from './services/mqtt-service';
+import { pads } from './settings/settings';
 
 const Wrapper = styled.div`
   background-color: ${theme.background};
