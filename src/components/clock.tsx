@@ -8,25 +8,30 @@ const Wrapper = styled.div`
   position: relative;
   
   .react-clock{
-    width:40vw!important;
-    height:40vw!important;
+    width:80vh!important;
+    height:80vh!important;
   }
   .react-clock__face{
     background-color: ${theme.background}!important;
     border-color: ${theme.foreground}!important;
+    border-width: 4px!important;
   }
   .react-clock__hand__body, .react-clock__mark__body{
     background-color: ${theme.foreground}!important;
   }
   .react-clock__hour-hand__body{
-    width:8px!important;
+    background-color: ${theme.foreground}!important;
+    width:11px!important;
+    top: 15%!important;
   }
   .react-clock__minute-hand__body{
-    width:5px!important;
+    background-color: ${theme.foregroundAccent}!important;
+    width:8px!important;
+    top: 7%!important;
   }
   .react-clock__second-hand__body{
-    width:4px!important;
-    top: 7.5%!important;
+    width:6px!important;
+    top: 3%!important;
     bottom: 45%!important;
     background-color: ${theme.danger}!important;
   }

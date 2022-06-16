@@ -32,7 +32,7 @@ const Column = styled.div`
   display:flex;
   flex: 1;
   flex-direction: column;
-  padding: 0 2em;
+  padding: 0 1em;
   justify-content: space-evenly;
 `
 
@@ -59,16 +59,26 @@ function App() {
   const [date, setDate] = useState<Date>(new Date());
   const [dashboard, setDashboard] = usePersistentState<{[id: string]: boolean }>('dashboard', {});
   const [weather, setWeather] = usePersistentState<object|null>('weather', null);
-  const [alerts, setAlerts] = usePersistentState<Array<{level:AlertLevels, text:string, timestamp:string}>|null>('alerts', []);
-  const timer1 = useTimer(() =>
-    setAlerts([...(alerts ?? []), {
-      level: "success",
-      text: "Timer complete!",
-      timestamp: date.toUTCString()
-    }]),
+  const [temperature, setTemperature] = usePersistentState<number|null>('temperature', null);
+  const [alerts, setAlerts] = usePersistentState<Array<{level:AlertLevels, text:string, timestamp:string}>>('alerts', []);
+  const [isSelectingInterval, setIsSelectingInterval] = useState(false);
+  const timer1 = useTimer(
+    () => pushAlert("success", "Timer complete!", date.toUTCString()),
     date,
     "timer1");
-  const [isSelectingInterval, setIsSelectingInterval] = useState(false);
+  
+  const pushAlert = useCallback((level:AlertLevels, text:string, timestamp:string) => {
+    setAlerts([...alerts, {level, text, timestamp}]);
+  }, [alerts, setAlerts]);
+  
+  const onMQTTreconnect = useCallback(() => {
+    setAlerts([...alerts
+      .filter((alert) => alert.text !== "MQTT disconnected."), {
+        level: "success",
+        text: "MQTT Connected",
+        timestamp: date.toUTCString()
+      }]);
+  }, [alerts, date, setAlerts]);
   
   const setPad = useCallback((id:string, state:boolean) => {
     console.log({[id]:state});
@@ -81,7 +91,13 @@ function App() {
     switch (topic) {
       case "efm/sensors/doorbell":
         setPad('door', !(dashboard.door as boolean));
-        // timer1.setByInterval(10, 0, 0);
+        break;
+      case "efm/sensors/weather/temperature":
+        const temp = Number(message);
+        if(temp) setTemperature(temp);
+        break;
+      case "efm/sensors/weather/humidity":
+        // We don't do anything with humidity at the moment.
         break;
       case "efm/weather":
         const w = JSON.parse(message)
@@ -91,18 +107,26 @@ function App() {
       case "efm/alerts":
         console.log(message);
         const JSONmsg = JSON.parse(message);
-        setAlerts([...(alerts ?? []), {
-          level: JSONmsg.level,
-          text: JSONmsg.text,
-          timestamp: date.toUTCString()
-        }]);
+        pushAlert(JSONmsg.level, JSONmsg.text, date.toUTCString());
         break;
       case "efm/time":
         console.log("NTP time:", message);
         setDate(new Date((message as unknown as number)*1000))
         break;
     }
-  }, ["efm/sensors/doorbell", "efm/weather", "efm/alerts", "efm/time"]);
+  }, [
+    "efm/sensors/doorbell",
+    "efm/sensors/weather/temperature",
+    "efm/sensors/weather/humidity",
+    "efm/weather",
+    "efm/alerts",
+    "efm/time"
+  ], () => {
+    onMQTTreconnect();
+  },
+  (e:string) => {
+    pushAlert("danger", e, date.toUTCString());
+  });
   
   return (
     <Wrapper className="App">
@@ -146,15 +170,34 @@ function App() {
         <TimeString>
           {
             date.getMinutes() >= 30 ?
-            `It's ${60 - date.getMinutes()} minutes to ${((date.getHours() % 12) || 12) + 1}`:
-            `It's ${date.getMinutes()} minutes past ${(date.getHours() % 12) || 12}`
+            `It's ${60 - date.getMinutes()} minutes to ${((date.getHours() % 12) || 12) + 1}:00`:
+            `It's ${date.getMinutes()} minutes past ${(date.getHours() % 12) || 12}:00`
           }
-          <br />
-          <br />
+          &nbsp; &nbsp; &nbsp;
           {date.toLocaleDateString('en-gb', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </TimeString>
       </Column>
       <Column>
+        <Pad
+          colour={"#E05f9f"}
+          accentColour={"#D05f9f"}
+          icon={faClock}
+          selected={timer1.isRunning}
+          setSelected={() => {}}
+          onClick={() => {
+            if(timer1.isComplete){
+              setIsSelectingInterval(!isSelectingInterval);
+            }
+            else{
+              timer1.isRunning ? timer1.pause() : timer1.start();
+            }
+          }}
+          ondblclick={() => timer1.reset()}
+        >
+          {timer1.isComplete ? 
+            "Add timer" : timer1.countDown}
+        </Pad>
+        <Weather weather={weather} currentTemperature={temperature}/>
         {pads.map((pad, key) => {
           if(pad.side !== 'right') return <></>;
           return (
@@ -170,26 +213,6 @@ function App() {
             </Pad>
           );
         })}
-        <Weather weather={weather} />
-          <Pad
-            colour={"#E05f9f"}
-            accentColour={"#D05f9f"}
-            icon={faClock}
-            selected={timer1.isRunning}
-            setSelected={() => {}}
-            onClick={() => {
-              if(timer1.isComplete){
-                setIsSelectingInterval(!isSelectingInterval);
-              }
-              else{
-                timer1.isRunning ? timer1.pause() : timer1.start();
-              }
-            }}
-            ondblclick={() => timer1.reset()}
-          >
-            {timer1.isComplete ? 
-              "Add timer" : timer1.countDown}
-          </Pad>
           <IntervalPicker
             setInterval={(s:number, m:number, h:number) => {
               if(s === 0 && m === 0 && h === 0) return; // don't start 0 timer

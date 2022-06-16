@@ -1,3 +1,9 @@
+//X///X///X///X///X///X//X//
+/*
+  THIS FILE IS DEPRECATED.
+  PLEASE USE MQTT-SERVICE.ts
+*/
+//X///X///X///X///X///X//X//
 import { useEffect } from 'react';
 import { createGlobalState } from 'react-hooks-global-state';
 
