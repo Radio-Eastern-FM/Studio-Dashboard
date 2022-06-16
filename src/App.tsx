@@ -21,6 +21,18 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: row;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
+  @media (max-width: 1300px) {
+    flex-direction: column;
+    .clock-column{
+      flex-direction: column;
+      * {
+        margin: auto;
+      }
+    }
+    .brand{
+      display: none;
+    }
+  }
 `;
 
 const ClockWrapper = styled.div`
@@ -34,6 +46,9 @@ const Column = styled.div`
   flex-direction: column;
   padding: 0 1em;
   justify-content: space-evenly;
+  @media (max-width: 1300px) {
+    flex-direction: row;
+  }
 `
 
 const TimeString = styled.div`
@@ -159,8 +174,8 @@ function App() {
         )
         })}
       </Column>
-      <Column>
-        <Brand>
+      <Column className="clock-column">
+        <Brand className="brand">
           Radio Eastern FM 98.1 <br />
           <Small>Your voice in the outer-east</Small>
         </Brand>

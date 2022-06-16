@@ -10,9 +10,9 @@ const Wrapper = styled.div`
   padding: 0.5em 0;
 `;
 
-function Brand(props: {children?:React.ReactNode}) {
+function Brand(props: { children?:React.ReactNode, className?:string }) {
   return (
-    <Wrapper>
+    <Wrapper className={props.className}>
       {props.children}
     </Wrapper>
   );

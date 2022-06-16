@@ -10,11 +10,16 @@ const Wrapper = styled.div`
   .react-clock{
     width:80vh!important;
     height:80vh!important;
+    @media (max-width: 1300px) {
+      max-width: 65vh!important;
+      max-height: 65vh!important;
+    }
   }
+  
   .react-clock__face{
     background-color: ${theme.background}!important;
-    border-color: ${theme.foreground}!important;
-    border-width: 4px!important;
+    border-color: ${theme.foregroundAccent}!important;
+    border-width: 3px!important;
   }
   .react-clock__hand__body, .react-clock__mark__body{
     background-color: ${theme.foreground}!important;

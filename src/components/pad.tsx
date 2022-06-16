@@ -27,6 +27,9 @@ const Button = styled.button`
     border: solid 1px ${(props:{accentColour:string}) => props.accentColour};
     background-color: ${(props:{accentColour:string}) => props.accentColour};
   }
+  @media (max-width: 1300px) {
+    margin: 0.1em;
+  }
 `;
 
 const Icon = styled(FontAwesomeIcon)`

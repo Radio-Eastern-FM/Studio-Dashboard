@@ -11,16 +11,21 @@ const Wrapper = styled.a`
   display: flex;
   flex-direction: column;
   color: ${theme.foreground};
-  min-height: 20vh;
+  min-height: 12.5vh;
+  min-width: 2em;
   background-color: ${theme.backgroundMuted};
   cursor: pointer;
   text-align: center;
   font-size: 1em;
-  padding: 0.5em 0;
+  /* padding: 0.5em 0; */
   text-decoration: none;
   h5{
     font-size: 1.1em;
     padding: 0.1em 0
+  }
+  @media (max-width: 1300px) {
+    margin: 0.1em;
+    height: 12.5vh;
   }
 `;
 
