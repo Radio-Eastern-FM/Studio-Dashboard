@@ -1,6 +1,8 @@
 
 # StudioDashboad
 
+The user interface encompasing a clock, timer, weather, and numerous configurable 'pads' (buttons)
+
 ```bash
 git clone https://github.com/Xenarc/StudioDashboad.git
 ```
